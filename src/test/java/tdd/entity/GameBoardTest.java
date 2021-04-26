@@ -36,7 +36,7 @@ public class GameBoardTest {
 
     @Test
     public void testGameBoardIsInitializedWithExpectedStartPlayer() {
-        Assertions.assertEquals(1, gameBoard.getActivePlayerId());
+        Assertions.assertEquals('X', gameBoard.getActivePlayerSymbol());
     }
 
     private static Stream<Arguments> testGameBoardHasExpectedFieldsSetAfterPlayerCheckedAField() {
@@ -73,13 +73,14 @@ public class GameBoardTest {
     @ParameterizedTest
     @MethodSource
     public void testGameBoardHasExpectedFieldsSetAfterPlayerCheckedAField(
-            char[] givenGameBoardFields,
-            int fieldPositionToCheck,
-            char[] expectedGameBoardFields
+        char[] givenGameBoardFields,
+        int fieldPositionToCheck,
+        char[] expectedGameBoardFields
     ) {
         gameBoard.setGameBoardFields(givenGameBoardFields);
         gameBoard.checkFieldOnPosition(fieldPositionToCheck);
+
         Assertions.assertArrayEquals(expectedGameBoardFields, gameBoard.getFields());
-        Assertions.assertEquals(2, gameBoard.getActivePlayerId());
+        Assertions.assertEquals('O', gameBoard.getActivePlayerSymbol());
     }
 }

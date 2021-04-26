@@ -1,7 +1,7 @@
 package tdd.entity;
 
 public class GameBoard {
-    private int activePlayerId = 1;
+    private char activePlayerSymbol = 'X';
     private char[] fields = new char[] {};
 
     public GameBoard() {
@@ -21,15 +21,15 @@ public class GameBoard {
     }
 
     private void toggleActivePlayer() {
-        this.activePlayerId = 1 == activePlayerId ? 2 : 1;
+        this.activePlayerSymbol = 'X' == activePlayerSymbol ? 'O' : 'X';
     }
 
     public void checkFieldOnPosition(int fieldPosition) {
-        fields[fieldPosition - 1] = 1 == activePlayerId ? 'X' : 'O';
+        fields[fieldPosition - 1] = activePlayerSymbol;
         toggleActivePlayer();
     }
 
-    public int getActivePlayerId() {
-        return this.activePlayerId;
+    public int getActivePlayerSymbol() {
+        return this.activePlayerSymbol;
     }
 }
