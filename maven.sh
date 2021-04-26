@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+MSYS_NO_PATHCONV=1 docker run -it --rm --name my-maven-project -v "$(PWD):/app" -v "$HOME/.m2:/root/.m2" -v "$PWD/target:/usr/src/mymaven/target" -w /app -p 8080:8080 maven:3.8-openjdk-8 mvn $@
