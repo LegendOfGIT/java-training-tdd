@@ -1,33 +1,24 @@
 package tdd.util;
 
+import tdd.constants.BoardPositions;
 import tdd.enums.PlayerSymbol;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class GameWinnerResolver {
-    private static final int BOARD_POSITION_TOP_LEFT = 0;
-    private static final int BOARD_POSITION_TOP = 1;
-    private static final int BOARD_POSITION_TOP_RIGHT = 2;
-    private static final int BOARD_POSITION_LEFT = 3;
-    private static final int BOARD_POSITION_CENTER = 4;
-    private static final int BOARD_POSITION_RIGHT = 5;
-    private static final int BOARD_POSITION_BOTTOM_LEFT = 6;
-    private static final int BOARD_POSITION_BOTTOM = 7;
-    private static final int BOARD_POSITION_BOTTOM_RIGHT = 8;
-
     public static List<List<Integer>> winningConfigurations = List.of(
         //  vertically
-        List.of(BOARD_POSITION_TOP_LEFT, BOARD_POSITION_LEFT, BOARD_POSITION_BOTTOM_LEFT),
-        List.of(BOARD_POSITION_TOP, BOARD_POSITION_CENTER, BOARD_POSITION_BOTTOM),
-        List.of(BOARD_POSITION_TOP_RIGHT, BOARD_POSITION_RIGHT, BOARD_POSITION_BOTTOM_RIGHT),
+        List.of(BoardPositions.POSITION_TOP_LEFT, BoardPositions.POSITION_LEFT, BoardPositions.POSITION_BOTTOM_LEFT),
+        List.of(BoardPositions.POSITION_TOP, BoardPositions.POSITION_CENTER, BoardPositions.POSITION_BOTTOM),
+        List.of(BoardPositions.POSITION_TOP_RIGHT, BoardPositions.POSITION_RIGHT, BoardPositions.POSITION_BOTTOM_RIGHT),
         //  horizontally
-        List.of(BOARD_POSITION_TOP_LEFT, BOARD_POSITION_TOP, BOARD_POSITION_TOP_RIGHT),
-        List.of(BOARD_POSITION_LEFT, BOARD_POSITION_CENTER, BOARD_POSITION_RIGHT),
-        List.of(BOARD_POSITION_BOTTOM_LEFT, BOARD_POSITION_BOTTOM, BOARD_POSITION_BOTTOM_RIGHT),
+        List.of(BoardPositions.POSITION_TOP_LEFT, BoardPositions.POSITION_TOP, BoardPositions.POSITION_TOP_RIGHT),
+        List.of(BoardPositions.POSITION_LEFT, BoardPositions.POSITION_CENTER, BoardPositions.POSITION_RIGHT),
+        List.of(BoardPositions.POSITION_BOTTOM_LEFT, BoardPositions.POSITION_BOTTOM, BoardPositions.POSITION_BOTTOM_RIGHT),
         //  diagonally
-        List.of(BOARD_POSITION_TOP_LEFT, BOARD_POSITION_CENTER, BOARD_POSITION_BOTTOM_RIGHT),
-        List.of(BOARD_POSITION_TOP_RIGHT, BOARD_POSITION_CENTER, BOARD_POSITION_BOTTOM_LEFT)
+        List.of(BoardPositions.POSITION_TOP_LEFT, BoardPositions.POSITION_CENTER, BoardPositions.POSITION_BOTTOM_RIGHT),
+        List.of(BoardPositions.POSITION_TOP_RIGHT, BoardPositions.POSITION_CENTER, BoardPositions.POSITION_BOTTOM_LEFT)
     );
 
     private static boolean isPlayersTurn(PlayerSymbol[] gameBoard, PlayerSymbol playerSymbol) {
@@ -59,9 +50,7 @@ public class GameWinnerResolver {
 
     private static boolean hasOnePlayerTakenTooManyTurns(PlayerSymbol[] gameBoard) {
         var playersTurns = Arrays.stream(gameBoard).filter(field -> field == PlayerSymbol.X).count();
-
-        var opponentSymbol = PlayerSymbol.O;
-        var opponentTurns = Arrays.stream(gameBoard).filter(field -> field == opponentSymbol).count();
+        var opponentTurns = Arrays.stream(gameBoard).filter(field -> field == PlayerSymbol.O).count();
         var playerTurnDifference = playersTurns - opponentTurns;
 
         return playerTurnDifference > 1 || playerTurnDifference < -1;

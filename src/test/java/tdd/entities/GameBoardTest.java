@@ -13,8 +13,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tdd.constants.BoardPositions;
 import tdd.enums.PlayerSymbol;
 import tdd.util.GameWinnerResolver;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class GameBoardTest {
@@ -34,11 +38,7 @@ public class GameBoardTest {
     @Test
     public void testGameBoardHasAllExpectedFields() {
         Assertions.assertArrayEquals(
-            new PlayerSymbol[]{
-                PlayerSymbol.BLANK, PlayerSymbol.BLANK, PlayerSymbol.BLANK,
-                PlayerSymbol.BLANK, PlayerSymbol.BLANK, PlayerSymbol.BLANK,
-                PlayerSymbol.BLANK, PlayerSymbol.BLANK, PlayerSymbol.BLANK
-            },
+            GameBoard.EMPTY_BOARD,
             gameBoard.getFields()
         );
     }
@@ -85,6 +85,8 @@ public class GameBoardTest {
                                                                           int fieldPositionToCheck,
                                                                           PlayerSymbol[] expectedGameBoardFields
     ) {
+        when(gameWinnerResolver.resolveWinner(any())).thenReturn(PlayerSymbol.BLANK);
+
         gameBoard.setGameBoardFields(givenGameBoardFields);
         gameBoard.checkFieldOnPosition(fieldPositionToCheck);
 
@@ -95,6 +97,8 @@ public class GameBoardTest {
     @Test
     public void testGameBoardCallsGameWinnerResolverWithExpectedArgumentsWhenFieldIsChecked()
     {
+        when(gameWinnerResolver.resolveWinner(any())).thenReturn(PlayerSymbol.BLANK);
+
         var currentBoard = new PlayerSymbol[]{
             PlayerSymbol.BLANK, PlayerSymbol.BLANK, PlayerSymbol.BLANK,
             PlayerSymbol.BLANK, PlayerSymbol.X, PlayerSymbol.BLANK,
@@ -106,6 +110,7 @@ public class GameBoardTest {
         var gameBoardFromArgument = ArgumentCaptor.forClass(PlayerSymbol[].class);
         Mockito.verify(gameWinnerResolver).resolveWinner(gameBoardFromArgument.capture());
 
+        currentBoard[FIELD_POSITION_TOP_RIGHT] = PlayerSymbol.X;
         Assertions.assertArrayEquals(
             currentBoard,
             gameBoardFromArgument.getValue()
@@ -121,7 +126,7 @@ public class GameBoardTest {
             ),
             Arguments.of(
                 "positive out of range",
-                9,
+                10,
                 "game board field is invalid"
             ),
             Arguments.of(
@@ -138,6 +143,8 @@ public class GameBoardTest {
                                                                    Integer pickedPosition,
                                                                    String expectedExceptionMessage)
     {
+        when(gameWinnerResolver.resolveWinner(any())).thenReturn(PlayerSymbol.BLANK);
+
         var exception = Assertions.assertThrows(RuntimeException.class, () -> {
             gameBoard.checkFieldOnPosition(FIELD_POSITION_TOP_LEFT);
             gameBoard.checkFieldOnPosition(FIELD_POSITION_TOP_CENTER);
@@ -145,5 +152,38 @@ public class GameBoardTest {
         });
 
         Assertions.assertEquals(expectedExceptionMessage, exception.getMessage());
+    }
+
+    private static Stream<Arguments> testCheckFieldResetsBoardAndThrowsWinnerExceptionWhenThereWasAGameWinner() {
+        return Stream.of(
+            Arguments.of(
+                "Player X won the game",
+                PlayerSymbol.X,
+                "Player X has won the game. Congratulations! Game over... Board is reset."
+            ),
+            Arguments.of(
+                "Player O won the game",
+                PlayerSymbol.O,
+                "Player O has won the game. Congratulations! Game over... Board is reset."
+            )
+        );
+    }
+
+    @ParameterizedTest(name="{0}")
+    @MethodSource
+    public void testCheckFieldResetsBoardAndThrowsWinnerExceptionWhenThereWasAGameWinner(String testName,
+                                                                           PlayerSymbol winnerSymbol,
+                                                                           String expectedExceptionMessage) {
+        when(gameWinnerResolver.resolveWinner(any())).thenReturn(winnerSymbol);
+        var givenBoard = GameBoard.EMPTY_BOARD.clone();
+        givenBoard[BoardPositions.POSITION_BOTTOM] = PlayerSymbol.O;
+        gameBoard.setGameBoardFields(givenBoard);
+
+        var exception = Assertions.assertThrows(RuntimeException.class, () -> {
+            gameBoard.checkFieldOnPosition(BoardPositions.POSITION_CENTER);
+        });
+
+        Assertions.assertEquals(expectedExceptionMessage, exception.getMessage());
+        Assertions.assertArrayEquals(GameBoard.EMPTY_BOARD, gameBoard.getFields());
     }
 }

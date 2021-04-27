@@ -1,5 +1,6 @@
 package tdd.entities;
 
+import tdd.constants.BoardPositions;
 import tdd.enums.PlayerSymbol;
 import tdd.util.GameWinnerResolver;
 
@@ -8,13 +9,14 @@ public class GameBoard {
     private PlayerSymbol[] fields = new PlayerSymbol[] {};
 
     private final GameWinnerResolver gameWinnerResolver;
+    public static final PlayerSymbol[] EMPTY_BOARD = new PlayerSymbol[]{
+        PlayerSymbol.BLANK, PlayerSymbol.BLANK, PlayerSymbol.BLANK,
+        PlayerSymbol.BLANK, PlayerSymbol.BLANK, PlayerSymbol.BLANK,
+        PlayerSymbol.BLANK, PlayerSymbol.BLANK, PlayerSymbol.BLANK,
+    };
 
     public GameBoard(GameWinnerResolver gameWinnerResolver) {
-        setGameBoardFields(new PlayerSymbol[]{
-            PlayerSymbol.BLANK, PlayerSymbol.BLANK, PlayerSymbol.BLANK,
-            PlayerSymbol.BLANK, PlayerSymbol.BLANK, PlayerSymbol.BLANK,
-            PlayerSymbol.BLANK, PlayerSymbol.BLANK, PlayerSymbol.BLANK,
-        });
+        setGameBoardFields(EMPTY_BOARD.clone());
 
         this.gameWinnerResolver = gameWinnerResolver;
     }
@@ -35,11 +37,20 @@ public class GameBoard {
     }
 
     /**
+     * @param fieldPositionInArray the actual field position in field array
+     * @return true when picked field position is not on the board
+     */
+    private boolean isFieldPositionOutOfBounds(int fieldPositionInArray) {
+        return fieldPositionInArray < BoardPositions.POSITION_TOP_LEFT ||
+            fieldPositionInArray > BoardPositions.POSITION_BOTTOM_RIGHT;
+    }
+
+    /**
      * @param fieldPosition the position of the field which should be checked
      */
     public void checkFieldOnPosition(int fieldPosition) {
         var fieldPositionInArray = fieldPosition -1;
-        if (fieldPositionInArray < 0 || fieldPositionInArray > 7) {
+        if (isFieldPositionOutOfBounds(fieldPositionInArray)) {
             throw new RuntimeException("game board field is invalid");
         }
 
@@ -47,10 +58,14 @@ public class GameBoard {
             throw new RuntimeException("game board field has already been picked");
         }
 
-        gameWinnerResolver.resolveWinner(this.fields);
-
         fields[fieldPositionInArray] = activePlayerSymbol;
         toggleActivePlayer();
+
+        var winner = gameWinnerResolver.resolveWinner(this.fields);
+        if (PlayerSymbol.BLANK != winner) {
+            fields = EMPTY_BOARD.clone();
+            throw new RuntimeException(String.format("Player %s has won the game. Congratulations! Game over... Board is reset.", winner));
+        }
     }
 
     public PlayerSymbol getActivePlayerSymbol() {
